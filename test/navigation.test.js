@@ -327,3 +327,13 @@ test("search excerpts are centered on matching content deep inside a long requir
   assert.ok(hit.excerpt.length <= 800);
   assert.equal(hit.textTruncated, true);
 });
+
+test("navigation ignores AppleDouble sidecars when indexing task events", async () => {
+  const f = fixture();
+  const directory = path.join(f.repo.dir, "events", f.id);
+  const file = fs.readdirSync(directory).find(name => name.endsWith(".json"));
+  fs.writeFileSync(path.join(directory, `._${file}`), Buffer.from([0, 5, 22, 7, 0, 2]));
+  const result = await f.run("search", { query: "Export CSV" });
+  assert.match(JSON.stringify(result), /Export CSV/);
+  assert.doesNotMatch(JSON.stringify(result), /Invalid JSON/);
+});

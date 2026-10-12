@@ -446,7 +446,7 @@ export function events(repo, task = null, { includeActivity = true } = {}) {
     }
     for (const file of fs
       .readdirSync(folder)
-      .filter((n) => n.endsWith(".json"))) {
+      .filter((n) => n.endsWith(".json") && !n.startsWith("._"))) {
       try {
         const absolute = path.join(folder, file),
           stat = fs.lstatSync(absolute);

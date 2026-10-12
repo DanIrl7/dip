@@ -613,3 +613,16 @@ test("large requests and emitted plans are retained without silent truncation", 
   assert.equal(state.tasks[0].description, prompt);
   assert.deepEqual(JSON.parse(state.activity.find((a) => a.plan).plan), plan);
 });
+
+test("AppleDouble sidecars do not corrupt task history but real broken JSON still does", () => {
+  const repo = fixture(), id = createTask(repo, { title: "External disk task" });
+  const directory = path.join(repo.dir, "events", id);
+  const file = fs.readdirSync(directory).find(name => name.endsWith(".json"));
+  fs.writeFileSync(path.join(directory, `._${file}`), Buffer.from([0, 5, 22, 7, 0, 2]));
+  assert.deepEqual(events(repo, id).errors, []);
+  assert.equal(taskGet(repo, id).title, "External disk task");
+  updateTask(repo, id, { description: "Still writable" });
+  fs.writeFileSync(path.join(directory, "broken.json"), "{broken");
+  assert.equal(events(repo, id).errors.length, 1);
+  assert.throws(() => updateTask(repo, id, { description: "Blocked" }), /corrupt|invalid/i);
+});

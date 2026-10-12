@@ -185,7 +185,7 @@ function history(root, id) {
     events = [];
   if (!fs.existsSync(directory)) throw new Error("Task not found");
   for (const name of fs.readdirSync(directory).sort()) {
-    if (!name.endsWith(".json")) continue;
+    if (!name.endsWith(".json") || name.startsWith("._")) continue;
     try {
       const file = safe(root, `.dip/events/${id}/${name}`);
       if (fs.statSync(file).size > 8 * 1024 * 1024)
