@@ -283,7 +283,8 @@ test("doctor separates present configured hooks and historical entry from proven
       at: "2026-01-01T00:00:00.000Z",
       agent: "git",
     });
-    rt.flush(f.root);
+    // Runtime queues use the canonical repository path (macOS /var is a symlink).
+    rt.flush(f.repo.root);
   } finally {
     rt.close();
   }
