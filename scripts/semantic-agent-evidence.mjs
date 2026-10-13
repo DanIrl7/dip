@@ -15,9 +15,16 @@ assert.equal(summary.rawHash,sha(fs.readFileSync('docs/benchmarks/2026-10-08-sem
 assert.equal(summary.protocolHash,data.protocolHash);
 for(const a of summary.arms){const rows=data.rows.filter(x=>x.arm===a.arm);assert.equal(a.runs,rows.length);assert.equal(a.functionalPassed,rows.reduce((n,x)=>n+x.score.passed,0));assert.equal(a.memoryPassed,rows.reduce((n,x)=>n+x.score.memoryPassed,0));assert.equal(a.toolCalls,rows.reduce((n,x)=>n+x.toolCalls,0));assert.equal(a.inputTokens,rows.reduce((n,x)=>n+(x.usage?.input_tokens||0),0));}
 assert.equal(protocol.common,common);
+// Historical results attest to the original benchmark sources, not today's working tree.
+// Each frozen source was recovered from the recorded Git commit and matches the
+// existing protocol hash. Current behavior is validated separately by local tests.
+const frozenSources=JSON.parse(zlib.gunzipSync(fs.readFileSync('scripts/fixtures/semantic-agent-protocol-sources.json.gz')));
+assert.equal(frozenSources.version,1);
+assert.deepEqual(Object.keys(frozenSources.sources).sort(),Object.keys(protocol.sources).sort());
 for(const [file,hash]of Object.entries(protocol.sources)){
-  const frozen=file==='src/semantic-worker.py'?'scripts/fixtures/semantic-worker-protocol.py':file;
-  assert.equal(sha(fs.readFileSync(frozen,'utf8').replaceAll('\r\n','\n')),hash,file);
+  const frozen=frozenSources.sources[file];
+  assert.match(frozen.commit,/^[0-9a-f]{40}$/);
+  assert.equal(sha(frozen.content.replaceAll('\r\n','\n')),hash,file);
 }
 const root=fs.mkdtempSync(path.join(os.tmpdir(),'dip-semantic-replay-'));
 const flags=s=>({checks:s.checks.map(({name,passed})=>({name,passed})),memory:s.memory,passed:s.passed,total:s.total,memoryPassed:s.memoryPassed,memoryTotal:s.memoryTotal,allPassed:s.allPassed,recovery:s.recovery});

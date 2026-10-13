@@ -121,7 +121,7 @@ function index(repo, rt) {
           JSON.stringify(
             fs
               .readdirSync(directory)
-              .filter((s) => s.endsWith(".json"))
+              .filter((s) => s.endsWith(".json") && !s.startsWith("._"))
               .sort()
               .map((name) => {
                 const s = fs.lstatSync(path.join(directory, name));

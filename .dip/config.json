@@ -229,6 +229,16 @@
         "scripts/production-evidence.mjs"
       ],
       "timeoutMs": 120000
+    },
+    "appledouble": {
+      "command": [
+        "node",
+        "--test",
+        "test/core.test.js",
+        "test/low-friction.test.js",
+        "test/navigation.test.js"
+      ],
+      "timeoutMs": 90000
     }
   },
   "mode": "coordinate",

@@ -519,3 +519,14 @@ test("explicit isomorphic-git client callback adopts an unmonitored repository w
   const adopted = discoverClientProject(linked, { client: "isomorphic-git" });
   assert.equal(adopted.adopted, true);
 });
+
+test("portable history skips AppleDouble JSON sidecars and remains writable", () => {
+  const f = fixture(), id = portable("create", { title: "External disk" }, f.root).id;
+  const directory = path.join(f.repo.dir, "events", id);
+  const file = fs.readdirSync(directory).find(name => name.endsWith(".json"));
+  fs.writeFileSync(path.join(directory, `._${file}`), Buffer.from([0, 5, 22, 7, 0, 2]));
+  portable("update", { id, patch: { description: "Updated" } }, f.root);
+  assert.equal(taskRead(f.repo, id).description, "Updated");
+  fs.writeFileSync(path.join(directory, "broken.json"), "{broken");
+  assert.throws(() => portable("update", { id, patch: { description: "No" } }, f.root), /invalid|corrupt/i);
+});
