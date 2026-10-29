@@ -350,3 +350,6 @@ try {
   fs.rmSync(workerRoot, { recursive: true, force: true });
   fs.rmSync(root, { recursive: true, force: true });
 }
+
+// Exercise delayed responses as well as the normal dashboard update flow.
+await import("./detail-drafts-smoke.mjs");
